@@ -174,6 +174,21 @@ async function loadProjects() {
   const clock = projects.find(p => p.repo === 'lucifermornngstar52-cell/clock-angle-game');
   if (clock && clock.version === '—') clock.version = 'v16';
 
+  // Debug logging
+  const clockProj = projects.find(p => p.id === 'default_clock');
+  if (clockProj) {
+    console.log('[DEBUG] Clock project:', {
+      version: clockProj.version,
+      downloads: clockProj.downloads,
+      allAssets: clockProj.allAssets ? clockProj.allAssets.length : 'undefined',
+      url: clockProj.url,
+      platforms: clockProj.platforms
+    });
+    if (clockProj.allAssets) {
+      clockProj.allAssets.forEach(a => console.log('  asset:', a.name, a.size, a.url.substring(0, 60)));
+    }
+  }
+
   projects.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
   renderProjects();
   updateStats();
@@ -295,6 +310,9 @@ function openModal(id) {
     dlBtn = `<button class="btn-primary" disabled>Файл недоступен</button>`;
   }
 
+  const githubBtn = p.repo ? `<a href="https://github.com/${p.repo}" target="_blank" class="btn-secondary">📂 GitHub</a>` : '';
+  const isMultiAsset = p.allAssets && p.allAssets.length > 1;
+  
   document.getElementById('modalContent').innerHTML = `
     <div class="modal-icon">${iconHtml}</div>
     <h2>${p.name}</h2>
@@ -302,9 +320,9 @@ function openModal(id) {
     ${metaHtml}
     <p class="modal-desc">${p.desc}</p>
     ${shotsHtml}
+    ${isMultiAsset ? `<div class="modal-assets-section"><h4>Файлы для скачивания:</h4>${dlBtn}</div>` : ''}
     <div class="modal-actions">
-      ${dlBtn}
-      ${p.repo ? `<a href="https://github.com/${p.repo}" target="_blank" class="btn-secondary">📂 GitHub</a>` : ''}
+      ${isMultiAsset ? githubBtn : dlBtn + githubBtn}
     </div>
   `;
 
