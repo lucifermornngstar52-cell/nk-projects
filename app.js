@@ -1,11 +1,14 @@
 // ===== CONFIG =====
 const GITHUB_REPOS = [
-  'lucifermornngstar52-cell/aika-assistant'
+  'lucifermornngstar52-cell/aika-assistant',
+  'lucifermornngstar52-cell/airi-assistant',
+  'lucifermornngstar52-cell/clock-angle-game',
+  'lucifermornngstar52-cell/aika-admin'
 ];
 
 const ADMIN_PASSWORD = 'nikita2026';
 
-// Предзаполненные проекты (показываются всегда)
+// Предзаполненные проекты (показываются всегда, дополняются релизами)
 const DEFAULT_PROJECTS = [
   {
     id: 'default_aika',
@@ -19,7 +22,53 @@ const DEFAULT_PROJECTS = [
     date: '2026-08-11T00:00:00Z',
     downloads: 0,
     shots: [],
-    auto: false
+    auto: false,
+    platforms: ['android']
+  },
+  {
+    id: 'default_airi',
+    name: 'AIRI Assistant',
+    desc: 'AI-ассистент с тёмным UI на Flutter + GPT-4o-mini. Голосовое управление, чат, автоматизация задач.',
+    category: 'app',
+    icon: '🌙',
+    repo: 'lucifermornngstar52-cell/airi-assistant',
+    version: '—',
+    url: '',
+    date: '2026-07-26T00:00:00Z',
+    downloads: 0,
+    shots: [],
+    auto: false,
+    platforms: ['android']
+  },
+  {
+    id: 'default_clock',
+    name: 'Хранители Времени',
+    desc: 'Образовательная игра по математике времени для детей 1-5 классов. Учи углы стрелок часов в увлекательной форме! Android APK + Windows EXE.',
+    category: 'game',
+    icon: '🕐',
+    repo: 'lucifermornngstar52-cell/clock-angle-game',
+    version: 'v16',
+    url: '',
+    date: '2026-08-11T10:32:52Z',
+    downloads: 0,
+    shots: [],
+    auto: false,
+    platforms: ['android', 'windows']
+  },
+  {
+    id: 'default_aika_admin',
+    name: 'Aika Admin Panel',
+    desc: 'Панель управления лицензиями для Aika Assistant. Управление доступом, ключами и пользователями.',
+    category: 'tool',
+    icon: '🔧',
+    repo: 'lucifermornngstar52-cell/aika-admin',
+    version: '—',
+    url: '',
+    date: '2026-06-06T00:00:00Z',
+    downloads: 0,
+    shots: [],
+    auto: false,
+    platforms: ['web']
   }
 ];
 
@@ -51,33 +100,58 @@ async function loadProjects() {
   const custom = JSON.parse(localStorage.getItem('nk_projects') || '[]');
   projects = [...DEFAULT_PROJECTS, ...custom];
 
+  // Загружаем релизы из всех репозиториев
   for (const repo of GITHUB_REPOS) {
     try {
       const releases = await fetchGitHubReleases(repo);
       for (const rel of releases) {
-        const apk = rel.assets.find(a => a.name.endsWith('.apk')) || rel.assets[0];
-        const existing = projects.find(p => p.repo === repo && p.version === rel.tag_name);
-        if (!existing) {
+        const assets = rel.assets || [];
+        // Ищем APK, EXE, ZIP
+        const apk = assets.find(a => a.name.endsWith('.apk'));
+        const exe = assets.find(a => a.name.endsWith('.exe'));
+        const zip = assets.find(a => a.name.endsWith('.zip'));
+        const primaryAsset = apk || exe || zip || assets[0];
+
+        // Ищем matching default project
+        const existing = projects.find(p => p.repo === repo && !p.auto);
+
+        if (existing) {
+          // Обновляем существующий проект данными из релиза
+          if (primaryAsset && !existing.url) existing.url = primaryAsset.browser_download_url;
+          if (rel.tag_name && existing.version === '—') existing.version = rel.tag_name;
+          existing.downloads = assets.reduce((s, a) => s + a.download_count, 0);
+          if (rel.published_at) existing.date = rel.published_at;
+          // Сохраняем все ассеты
+          existing.allAssets = assets.map(a => ({
+            name: a.name,
+            url: a.browser_download_url,
+            size: a.size,
+            downloads: a.download_count
+          }));
+        } else {
+          // Создаём новый проект из релиза
+          const isGame = repo.includes('clock') || repo.includes('game');
           projects.push({
             id: 'gh_' + repo + '_' + rel.tag_name,
             name: formatRepoName(repo),
             desc: rel.body ? rel.body.substring(0, 200) : 'Релиз ' + rel.tag_name,
-            category: 'app',
+            category: isGame ? 'game' : 'app',
             icon: '📦',
             repo: repo,
             version: rel.tag_name || '—',
-            url: apk ? apk.browser_download_url : rel.html_url,
-            downloads: rel.assets.reduce((s, a) => s + a.download_count, 0),
+            url: primaryAsset ? primaryAsset.browser_download_url : rel.html_url,
+            downloads: assets.reduce((s, a) => s + a.download_count, 0),
             date: rel.published_at,
             shots: [],
-            auto: true
+            auto: true,
+            platforms: detectPlatforms(assets),
+            allAssets: assets.map(a => ({
+              name: a.name,
+              url: a.browser_download_url,
+              size: a.size,
+              downloads: a.download_count
+            }))
           });
-        } else if (existing.auto === false) {
-          // Обновляем URL/версию для предзаполненных проектов
-          if (apk && !existing.url) existing.url = apk.browser_download_url;
-          if (rel.tag_name) existing.version = rel.tag_name;
-          existing.downloads = rel.assets.reduce((s, a) => s + a.download_count, 0);
-          if (rel.published_at) existing.date = rel.published_at;
         }
       }
     } catch (e) {
@@ -85,9 +159,21 @@ async function loadProjects() {
     }
   }
 
+  // Обновляем clock-angle-game с правильными ассетами
+  const clock = projects.find(p => p.repo === 'lucifermornngstar52-cell/clock-angle-game');
+  if (clock && clock.version === '—') clock.version = 'v16';
+
   projects.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
   renderProjects();
   updateStats();
+}
+
+function detectPlatforms(assets) {
+  const platforms = [];
+  if (assets.some(a => a.name.endsWith('.apk'))) platforms.push('android');
+  if (assets.some(a => a.name.endsWith('.exe'))) platforms.push('windows');
+  if (assets.some(a => a.name.endsWith('.zip'))) platforms.push('pwa');
+  return platforms.length ? platforms : ['other'];
 }
 
 async function fetchGitHubReleases(repo) {
@@ -120,12 +206,18 @@ function renderProjects() {
   }
 
   grid.innerHTML = filtered.map(p => {
-    const iconHtml = p.icon && (p.icon.startsWith('http') || p.icon.match(/.(png|jpg|jpeg|webp|gif|svg)/i))
+    const iconHtml = p.icon && (p.icon.startsWith('http') || p.icon.match(/\.(png|jpg|jpeg|webp|gif|svg)/i))
       ? `<img src="${p.icon}" alt="${p.name}">`
       : p.icon || '📦';
+
+    const platformIcons = (p.platforms || []).map(pl => {
+      const icons = { android: '🤖', windows: '🪟', web: '🌐', pwa: '📱', other: '📦' };
+      return icons[pl] || '📦';
+    }).join(' ');
+
     const dlBtn = p.url
       ? `<button class="card-download" onclick="event.stopPropagation();downloadProject('${p.id}')">⬇ Скачать</button>`
-      : `<button class="card-download" disabled>Нет файла</button>`;
+      : `<button class="card-download" disabled>Скоро</button>`;
 
     return `
       <div class="project-card" onclick="openModal('${p.id}')">
@@ -136,7 +228,7 @@ function renderProjects() {
           <div class="card-title">${p.name}</div>
           <div class="card-desc">${p.desc}</div>
           <div class="card-footer">
-            <span class="card-version">v${p.version}</span>
+            <span class="card-version">${platformIcons} v${p.version}</span>
             ${dlBtn}
           </div>
         </div>
@@ -158,7 +250,7 @@ function openModal(id) {
   const p = projects.find(x => x.id === id);
   if (!p) return;
 
-  const iconHtml = p.icon && (p.icon.startsWith('http') || p.icon.match(/.(png|jpg|jpeg|webp|gif|svg)/i))
+  const iconHtml = p.icon && (p.icon.startsWith('http') || p.icon.match(/\.(png|jpg|jpeg|webp|gif|svg)/i))
     ? `<img src="${p.icon}" alt="${p.name}">`
     : p.icon || '📦';
 
@@ -166,16 +258,31 @@ function openModal(id) {
     ? `<div class="modal-shots">${p.shots.map(s => `<img src="${s}" alt="screenshot">`).join('')}</div>`
     : '';
 
+  const platformIcons = (p.platforms || []).map(pl => {
+    const icons = { android: '🤖 Android', windows: '🪟 Windows', web: '🌐 Web', pwa: '📱 PWA', other: '📦' };
+    return `<span class="meta-item">${icons[pl] || '📦'}</span>`;
+  }).join('');
+
   const metaHtml = `
     <div class="modal-meta">
       <span class="meta-item">📅 ${p.date ? new Date(p.date).toLocaleDateString('ru') : '—'}</span>
       <span class="meta-item">⬇ ${p.downloads || 0} загрузок</span>
-      ${p.repo ? `<span class="meta-item">📦 ${p.repo}</span>` : ''}
+      ${platformIcons}
     </div>`;
 
-  const dlBtn = p.url
-    ? `<a href="${p.url}" download class="btn-primary">⬇ Скачать APK</a>`
-    : `<button class="btn-primary" disabled>Файл недоступен</button>`;
+  // Если есть несколько ассетов — показываем все
+  let dlBtn;
+  if (p.allAssets && p.allAssets.length > 1) {
+    dlBtn = `<div class="modal-assets">${p.allAssets.map(a => {
+      const icon = a.name.endsWith('.apk') ? '🤖' : a.name.endsWith('.exe') ? '🪟' : a.name.endsWith('.zip') ? '📦' : '📄';
+      const sizeMb = (a.size / 1024 / 1024).toFixed(1);
+      return `<a href="${a.url}" download class="btn-asset"><span>${icon} ${a.name}</span><small>${sizeMb} MB · ⬇ ${a.downloads}</small></a>`;
+    }).join('')}</div>`;
+  } else if (p.url) {
+    dlBtn = `<a href="${p.url}" download class="btn-primary">⬇ Скачать</a>`;
+  } else {
+    dlBtn = `<button class="btn-primary" disabled>Файл недоступен</button>`;
+  }
 
   document.getElementById('modalContent').innerHTML = `
     <div class="modal-icon">${iconHtml}</div>
@@ -245,7 +352,8 @@ function addProject() {
     url: document.getElementById('projUrl').value.trim() || '',
     date: new Date().toISOString(),
     downloads: 0,
-    shots: shots
+    shots: shots,
+    platforms: ['other']
   };
 
   if (project.repo && !project.url) {

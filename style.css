@@ -470,3 +470,23 @@ body::after {
   .modal-actions { flex-direction: column; }
   .section-title h2 { font-size: 22px; }
 }
+
+/* MULTI-ASSET DOWNLOAD */
+.modal-assets {
+  display: flex; flex-direction: column; gap: 10px;
+  flex: 1;
+}
+.btn-asset {
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 10px; padding: 14px 18px;
+  text-decoration: none; color: var(--text);
+  transition: all 0.2s;
+}
+.btn-asset:hover {
+  border-color: var(--border-hover);
+  background: var(--bg-card-hover);
+  box-shadow: 0 0 16px var(--accent-glow);
+}
+.btn-asset span { font-size: 15px; font-weight: 500; }
+.btn-asset small { font-size: 12px; color: var(--text-muted); }
