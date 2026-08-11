@@ -1,12 +1,27 @@
 // ===== CONFIG =====
-// Список GitHub репозиториев для автоподгрузки релизов
 const GITHUB_REPOS = [
   'lucifermornngstar52-cell/aika-assistant'
 ];
 
-// Пароль админ-панели (хранится в localStorage после первого входа)
-// Смени на свой! По умолчанию "nikita2026"
 const ADMIN_PASSWORD = 'nikita2026';
+
+// Предзаполненные проекты (показываются всегда)
+const DEFAULT_PROJECTS = [
+  {
+    id: 'default_aika',
+    name: 'Aika Assistant',
+    desc: 'AI-ассистент для Android с 3D-аватаром, голосовым управлением, доступом к экрану и автоматизацией задач. Live2D и 3D модели, оверлей поверх других приложений.',
+    category: 'app',
+    icon: '🤖',
+    repo: 'lucifermornngstar52-cell/aika-assistant',
+    version: '—',
+    url: '',
+    date: '2026-08-11T00:00:00Z',
+    downloads: 0,
+    shots: [],
+    auto: false
+  }
+];
 
 // ===== STATE =====
 let projects = [];
@@ -33,16 +48,13 @@ function setupNavFilters() {
 
 // ===== LOAD PROJECTS =====
 async function loadProjects() {
-  // Загружаем кастомные проекты из localStorage
   const custom = JSON.parse(localStorage.getItem('nk_projects') || '[]');
-  projects = [...custom];
+  projects = [...DEFAULT_PROJECTS, ...custom];
 
-  // Подгружаем релизы из GitHub
   for (const repo of GITHUB_REPOS) {
     try {
       const releases = await fetchGitHubReleases(repo);
       for (const rel of releases) {
-        // Ищём APK в ассетах
         const apk = rel.assets.find(a => a.name.endsWith('.apk')) || rel.assets[0];
         const existing = projects.find(p => p.repo === repo && p.version === rel.tag_name);
         if (!existing) {
@@ -58,8 +70,14 @@ async function loadProjects() {
             downloads: rel.assets.reduce((s, a) => s + a.download_count, 0),
             date: rel.published_at,
             shots: [],
-            auto: true  // авто-сгенерированный
+            auto: true
           });
+        } else if (existing.auto === false) {
+          // Обновляем URL/версию для предзаполненных проектов
+          if (apk && !existing.url) existing.url = apk.browser_download_url;
+          if (rel.tag_name) existing.version = rel.tag_name;
+          existing.downloads = rel.assets.reduce((s, a) => s + a.download_count, 0);
+          if (rel.published_at) existing.date = rel.published_at;
         }
       }
     } catch (e) {
@@ -67,9 +85,7 @@ async function loadProjects() {
     }
   }
 
-  // Сортируем по дате (новые первыми)
   projects.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
-
   renderProjects();
   updateStats();
 }
@@ -90,11 +106,7 @@ function formatRepoName(repo) {
 function renderProjects() {
   const grid = document.getElementById('projectsGrid');
   if (projects.length === 0) {
-    grid.innerHTML = `
-      <div class="empty-state">
-        <div class="emoji">📂</div>
-        <p>Пока нет проектов. Добавь через админ-панель ⚙️</p>
-      </div>`;
+    grid.innerHTML = `<div class="empty-state"><div class="emoji">📂</div><p>Пока нет проектов</p></div>`;
     return;
   }
 
@@ -137,8 +149,7 @@ function updateStats() {
   const totalDl = projects.reduce((s, p) => s + (p.downloads || 0), 0);
   document.getElementById('statDownloads').textContent = totalDl > 1000 ? (totalDl / 1000).toFixed(1) + 'k' : totalDl;
   if (projects.length > 0) {
-    const latest = projects[0];
-    document.getElementById('statLatest').textContent = latest.version || '—';
+    document.getElementById('statLatest').textContent = projects[0].version || '—';
   }
 }
 
@@ -237,7 +248,6 @@ function addProject() {
     shots: shots
   };
 
-  // Если есть репо но нет URL — пробуем взять последний релиз
   if (project.repo && !project.url) {
     fetchGitHubReleases(project.repo).then(releases => {
       if (releases.length > 0) {
@@ -261,7 +271,6 @@ function saveProject(project) {
   custom.push(project);
   localStorage.setItem('nk_projects', JSON.stringify(custom));
 
-  // Очистка формы
   ['projName','projDesc','projIcon','projRepo','projVersion','projUrl','projShots']
     .forEach(id => document.getElementById(id).value = '');
 
