@@ -174,21 +174,6 @@ async function loadProjects() {
   const clock = projects.find(p => p.repo === 'lucifermornngstar52-cell/clock-angle-game');
   if (clock && clock.version === '—') clock.version = 'v16';
 
-  // Debug logging
-  const clockProj = projects.find(p => p.id === 'default_clock');
-  if (clockProj) {
-    console.log('[DEBUG] Clock project:', {
-      version: clockProj.version,
-      downloads: clockProj.downloads,
-      allAssets: clockProj.allAssets ? clockProj.allAssets.length : 'undefined',
-      url: clockProj.url,
-      platforms: clockProj.platforms
-    });
-    if (clockProj.allAssets) {
-      clockProj.allAssets.forEach(a => console.log('  asset:', a.name, a.size, a.url.substring(0, 60)));
-    }
-  }
-
   projects.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
   renderProjects();
   updateStats();
