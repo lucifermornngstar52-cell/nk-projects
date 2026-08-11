@@ -12,7 +12,7 @@ const DEFAULT_PROJECTS = [
     name: 'Aika Assistant',
     desc: 'AI-ассистент для Android с 3D-аватаром, голосовым управлением, доступом к экрану и автоматизацией задач. Live2D и 3D модели, оверлей поверх других приложений.',
     category: 'app',
-    icon: '🤖',
+    icon: 'aika-banner.png',
     repo: 'lucifermornngstar52-cell/aika-assistant',
     version: '—',
     url: '',
@@ -120,7 +120,7 @@ function renderProjects() {
   }
 
   grid.innerHTML = filtered.map(p => {
-    const iconHtml = p.icon && p.icon.startsWith('http')
+    const iconHtml = p.icon && (p.icon.startsWith('http') || p.icon.match(/.(png|jpg|jpeg|webp|gif|svg)/i))
       ? `<img src="${p.icon}" alt="${p.name}">`
       : p.icon || '📦';
     const dlBtn = p.url
@@ -158,7 +158,7 @@ function openModal(id) {
   const p = projects.find(x => x.id === id);
   if (!p) return;
 
-  const iconHtml = p.icon && p.icon.startsWith('http')
+  const iconHtml = p.icon && (p.icon.startsWith('http') || p.icon.match(/.(png|jpg|jpeg|webp|gif|svg)/i))
     ? `<img src="${p.icon}" alt="${p.name}">`
     : p.icon || '📦';
 
