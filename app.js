@@ -1,9 +1,6 @@
 // ===== CONFIG =====
 const GITHUB_REPOS = [
-  'lucifermornngstar52-cell/aika-assistant',
-  'lucifermornngstar52-cell/airi-assistant',
-  'lucifermornngstar52-cell/clock-angle-game',
-  'lucifermornngstar52-cell/aika-admin'
+  'lucifermornngstar52-cell/clock-angle-game'
 ];
 
 const ADMIN_PASSWORD = 'nikita2026';
@@ -11,43 +8,13 @@ const ADMIN_PASSWORD = 'nikita2026';
 // Предзаполненные проекты (показываются всегда, дополняются релизами)
 const DEFAULT_PROJECTS = [
   {
-    id: 'default_aika',
-    name: 'Aika Assistant',
-    desc: 'AI-ассистент для Android с 3D-аватаром, голосовым управлением, доступом к экрану и автоматизацией задач. Live2D и 3D модели, оверлей поверх других приложений.',
-    category: 'app',
-    icon: 'aika-banner.png',
-    repo: 'lucifermornngstar52-cell/aika-assistant',
-    version: '—',
-    url: '',
-    date: '2026-08-11T00:00:00Z',
-    downloads: 0,
-    shots: [],
-    auto: false,
-    platforms: ['android']
-  },
-  {
-    id: 'default_airi',
-    name: 'AIRI Assistant',
-    desc: 'AI-ассистент с тёмным UI на Flutter + GPT-4o-mini. Голосовое управление, чат, автоматизация задач.',
-    category: 'app',
-    icon: '🌙',
-    repo: 'lucifermornngstar52-cell/airi-assistant',
-    version: '—',
-    url: '',
-    date: '2026-07-26T00:00:00Z',
-    downloads: 0,
-    shots: [],
-    auto: false,
-    platforms: ['android']
-  },
-  {
     id: 'default_clock',
     name: 'Хранители Времени',
     desc: 'Образовательная игра по математике времени для детей 1-5 классов. Учи углы стрелок часов в увлекательной форме! Android APK + Windows EXE.',
     category: 'game',
     icon: '🕐',
     repo: 'lucifermornngstar52-cell/clock-angle-game',
-    version: 'v16',
+    version: 'v17',
     url: '',
     date: '2026-08-11T10:32:52Z',
     downloads: 0,
@@ -55,21 +22,6 @@ const DEFAULT_PROJECTS = [
     auto: false,
     platforms: ['android', 'windows']
   },
-  {
-    id: 'default_aika_admin',
-    name: 'Aika Admin Panel',
-    desc: 'Панель управления лицензиями для Aika Assistant. Управление доступом, ключами и пользователями.',
-    category: 'tool',
-    icon: '🔧',
-    repo: 'lucifermornngstar52-cell/aika-admin',
-    version: '—',
-    url: '',
-    date: '2026-06-06T00:00:00Z',
-    downloads: 0,
-    shots: [],
-    auto: false,
-    platforms: ['web']
-  }
 ];
 
 // ===== STATE =====
