@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NK Projects — Личный маркет приложений</title>
+<link rel="stylesheet" href="style.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-inner">
+    <div class="logo" onclick="window.location.href='/'">
+      <div class="logo-icon">⚡</div>
+      <span>NK <b>Projects</b></span>
+    </div>
+    <nav class="nav">
+      <a href="#" class="nav-link active" data-filter="all">Все</a>
+      <a href="#" class="nav-link" data-filter="app">Приложения</a>
+      <a href="#" class="nav-link" data-filter="game">Игры</a>
+      <a href="#" class="nav-link" data-filter="tool">Инструменты</a>
+    </nav>
+    <button class="admin-btn" onclick="toggleAdmin()" title="Админ-панель">⚙️</button>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-content">
+    <h1>Мои проекты</h1>
+    <p>Эксклюзивная коллекция приложений и игр. Скачивай, устанавливай, тестируй.</p>
+    <div class="hero-stats" id="heroStats">
+      <div class="stat"><span class="stat-num" id="statApps">—</span><span class="stat-label">проектов</span></div>
+      <div class="stat"><span class="stat-num" id="statDownloads">—</span><span class="stat-label">загрузок</span></div>
+      <div class="stat"><span class="stat-num" id="statLatest">—</span><span class="stat-label">последний</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ADMIN PANEL -->
+<div class="admin-panel" id="adminPanel" style="display:none;">
+  <div class="admin-header">
+    <h2>⚙️ Панель управления</h2>
+    <button class="close-btn" onclick="toggleAdmin()">✕</button>
+  </div>
+  <div class="admin-login" id="adminLogin">
+    <p>Введите пароль администратора:</p>
+    <input type="password" id="adminPass" placeholder="Пароль" onkeypress="if(event.key==='Enter')adminLogin()">
+    <button class="btn-primary" onclick="adminLogin()">Войти</button>
+    <p class="admin-hint" id="adminHint"></p>
+  </div>
+  <div class="admin-content" id="adminContent" style="display:none;">
+    <h3>Добавить проект</h3>
+    <div class="admin-form">
+      <div class="form-row">
+        <label>Название</label>
+        <input type="text" id="projName" placeholder="Aika Assistant">
+      </div>
+      <div class="form-row">
+        <label>Описание</label>
+        <textarea id="projDesc" placeholder="AI-ассистент для Android..."></textarea>
+      </div>
+      <div class="form-row">
+        <label>Категория</label>
+        <select id="projCategory">
+          <option value="app">Приложение</option>
+          <option value="game">Игра</option>
+          <option value="tool">Инструмент</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>Иконка (URL или emoji)</label>
+        <input type="text" id="projIcon" placeholder="🤖 или https://...">
+      </div>
+      <div class="form-row">
+        <label>GitHub репозиторий</label>
+        <input type="text" id="projRepo" placeholder="lucifermornngstar52-cell/aika-assistant">
+      </div>
+      <div class="form-row">
+        <label>Версия</label>
+        <input type="text" id="projVersion" placeholder="1.0.0">
+      </div>
+      <div class="form-row">
+        <label>Ссылка на APK (или пусто — из GitHub Releases)</label>
+        <input type="text" id="projUrl" placeholder="https://... или пусто">
+      </div>
+      <div class="form-row">
+        <label>Скриншоты (через запятую)</label>
+        <input type="text" id="projShots" placeholder="https://img1.png, https://img2.png">
+      </div>
+      <button class="btn-primary" onclick="addProject()">Добавить</button>
+    </div>
+    <hr class="admin-divider">
+    <h3>Существующие проекты</h3>
+    <div id="adminProjectList"></div>
+  </div>
+</div>
+
+<!-- PROJECTS GRID -->
+<main class="main">
+  <div class="projects-grid" id="projectsGrid">
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Загрузка проектов...</p>
+    </div>
+  </div>
+</main>
+
+<!-- PROJECT MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" id="modal" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <p>© 2026 NK Projects · Powered by GitHub Pages</p>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>

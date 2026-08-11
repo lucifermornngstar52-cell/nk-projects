@@ -1,0 +1,294 @@
+// ===== CONFIG =====
+// Список GitHub репозиториев для автоподгрузки релизов
+const GITHUB_REPOS = [
+  'lucifermornngstar52-cell/aika-assistant'
+];
+
+// Пароль админ-панели (хранится в localStorage после первого входа)
+// Смени на свой! По умолчанию "nikita2026"
+const ADMIN_PASSWORD = 'nikita2026';
+
+// ===== STATE =====
+let projects = [];
+let currentFilter = 'all';
+let isAdmin = false;
+
+// ===== INIT =====
+document.addEventListener('DOMContentLoaded', () => {
+  loadProjects();
+  setupNavFilters();
+});
+
+function setupNavFilters() {
+  document.querySelectorAll('.nav-link').forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+      link.classList.add('active');
+      currentFilter = link.dataset.filter;
+      renderProjects();
+    });
+  });
+}
+
+// ===== LOAD PROJECTS =====
+async function loadProjects() {
+  // Загружаем кастомные проекты из localStorage
+  const custom = JSON.parse(localStorage.getItem('nk_projects') || '[]');
+  projects = [...custom];
+
+  // Подгружаем релизы из GitHub
+  for (const repo of GITHUB_REPOS) {
+    try {
+      const releases = await fetchGitHubReleases(repo);
+      for (const rel of releases) {
+        // Ищём APK в ассетах
+        const apk = rel.assets.find(a => a.name.endsWith('.apk')) || rel.assets[0];
+        const existing = projects.find(p => p.repo === repo && p.version === rel.tag_name);
+        if (!existing) {
+          projects.push({
+            id: 'gh_' + repo + '_' + rel.tag_name,
+            name: formatRepoName(repo),
+            desc: rel.body ? rel.body.substring(0, 200) : 'Релиз ' + rel.tag_name,
+            category: 'app',
+            icon: '📦',
+            repo: repo,
+            version: rel.tag_name || '—',
+            url: apk ? apk.browser_download_url : rel.html_url,
+            downloads: rel.assets.reduce((s, a) => s + a.download_count, 0),
+            date: rel.published_at,
+            shots: [],
+            auto: true  // авто-сгенерированный
+          });
+        }
+      }
+    } catch (e) {
+      console.log('GitHub API error for', repo, e);
+    }
+  }
+
+  // Сортируем по дате (новые первыми)
+  projects.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
+
+  renderProjects();
+  updateStats();
+}
+
+async function fetchGitHubReleases(repo) {
+  const url = `https://api.github.com/repos/${repo}/releases?per_page=10`;
+  const resp = await fetch(url);
+  if (!resp.ok) throw new Error('GitHub API: ' + resp.status);
+  return resp.json();
+}
+
+function formatRepoName(repo) {
+  const name = repo.split('/')[1] || repo;
+  return name.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+}
+
+// ===== RENDER =====
+function renderProjects() {
+  const grid = document.getElementById('projectsGrid');
+  if (projects.length === 0) {
+    grid.innerHTML = `
+      <div class="empty-state">
+        <div class="emoji">📂</div>
+        <p>Пока нет проектов. Добавь через админ-панель ⚙️</p>
+      </div>`;
+    return;
+  }
+
+  const filtered = currentFilter === 'all'
+    ? projects
+    : projects.filter(p => p.category === currentFilter);
+
+  if (filtered.length === 0) {
+    grid.innerHTML = `<div class="empty-state"><div class="emoji">🔍</div><p>Нет проектов в этой категории</p></div>`;
+    return;
+  }
+
+  grid.innerHTML = filtered.map(p => {
+    const iconHtml = p.icon && p.icon.startsWith('http')
+      ? `<img src="${p.icon}" alt="${p.name}">`
+      : p.icon || '📦';
+    const dlBtn = p.url
+      ? `<button class="card-download" onclick="event.stopPropagation();downloadProject('${p.id}')">⬇ Скачать</button>`
+      : `<button class="card-download" disabled>Нет файла</button>`;
+
+    return `
+      <div class="project-card" onclick="openModal('${p.id}')">
+        <div class="card-banner">${iconHtml}
+          ${p.downloads ? `<span class="card-badge">⬇ ${p.downloads}</span>` : ''}
+        </div>
+        <div class="card-body">
+          <div class="card-title">${p.name}</div>
+          <div class="card-desc">${p.desc}</div>
+          <div class="card-footer">
+            <span class="card-version">v${p.version}</span>
+            ${dlBtn}
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function updateStats() {
+  document.getElementById('statApps').textContent = projects.length;
+  const totalDl = projects.reduce((s, p) => s + (p.downloads || 0), 0);
+  document.getElementById('statDownloads').textContent = totalDl > 1000 ? (totalDl / 1000).toFixed(1) + 'k' : totalDl;
+  if (projects.length > 0) {
+    const latest = projects[0];
+    document.getElementById('statLatest').textContent = latest.version || '—';
+  }
+}
+
+// ===== MODAL =====
+function openModal(id) {
+  const p = projects.find(x => x.id === id);
+  if (!p) return;
+
+  const iconHtml = p.icon && p.icon.startsWith('http')
+    ? `<img src="${p.icon}" alt="${p.name}">`
+    : p.icon || '📦';
+
+  const shotsHtml = p.shots && p.shots.length
+    ? `<div class="modal-shots">${p.shots.map(s => `<img src="${s}" alt="screenshot">`).join('')}</div>`
+    : '';
+
+  const metaHtml = `
+    <div class="modal-meta">
+      <span class="meta-item">📅 ${p.date ? new Date(p.date).toLocaleDateString('ru') : '—'}</span>
+      <span class="meta-item">⬇ ${p.downloads || 0} загрузок</span>
+      ${p.repo ? `<span class="meta-item">📦 ${p.repo}</span>` : ''}
+    </div>`;
+
+  const dlBtn = p.url
+    ? `<a href="${p.url}" download class="btn-primary">⬇ Скачать APK</a>`
+    : `<button class="btn-primary" disabled>Файл недоступен</button>`;
+
+  document.getElementById('modalContent').innerHTML = `
+    <div class="modal-icon">${iconHtml}</div>
+    <h2>${p.name}</h2>
+    <p class="modal-version">Версия ${p.version}</p>
+    ${metaHtml}
+    <p class="modal-desc">${p.desc}</p>
+    ${shotsHtml}
+    <div class="modal-actions">
+      ${dlBtn}
+      ${p.repo ? `<a href="https://github.com/${p.repo}" target="_blank" class="btn-secondary">📂 GitHub</a>` : ''}
+    </div>
+  `;
+
+  document.getElementById('modalOverlay').classList.add('active');
+}
+
+function closeModal(e) {
+  if (e && e.target !== document.getElementById('modalOverlay')) return;
+  document.getElementById('modalOverlay').classList.remove('active');
+}
+
+function downloadProject(id) {
+  const p = projects.find(x => x.id === id);
+  if (p && p.url) window.open(p.url, '_blank');
+}
+
+// ===== ADMIN =====
+function toggleAdmin() {
+  const panel = document.getElementById('adminPanel');
+  const visible = panel.style.display !== 'none';
+  panel.style.display = visible ? 'none' : 'flex';
+  if (!visible && isAdmin) {
+    document.getElementById('adminLogin').style.display = 'none';
+    document.getElementById('adminContent').style.display = 'block';
+    renderAdminList();
+  }
+}
+
+function adminLogin() {
+  const pass = document.getElementById('adminPass').value;
+  if (pass === ADMIN_PASSWORD) {
+    isAdmin = true;
+    document.getElementById('adminLogin').style.display = 'none';
+    document.getElementById('adminContent').style.display = 'block';
+    renderAdminList();
+  } else {
+    document.getElementById('adminHint').textContent = 'Неверный пароль';
+  }
+}
+
+function addProject() {
+  const name = document.getElementById('projName').value.trim();
+  if (!name) { alert('Введите название'); return; }
+
+  const shots = document.getElementById('projShots').value.trim()
+    .split(',').map(s => s.trim()).filter(s => s);
+
+  const project = {
+    id: 'custom_' + Date.now(),
+    name: name,
+    desc: document.getElementById('projDesc').value.trim() || 'Без описания',
+    category: document.getElementById('projCategory').value,
+    icon: document.getElementById('projIcon').value.trim() || '📦',
+    repo: document.getElementById('projRepo').value.trim() || '',
+    version: document.getElementById('projVersion').value.trim() || '1.0.0',
+    url: document.getElementById('projUrl').value.trim() || '',
+    date: new Date().toISOString(),
+    downloads: 0,
+    shots: shots
+  };
+
+  // Если есть репо но нет URL — пробуем взять последний релиз
+  if (project.repo && !project.url) {
+    fetchGitHubReleases(project.repo).then(releases => {
+      if (releases.length > 0) {
+        const apk = releases[0].assets.find(a => a.name.endsWith('.apk'));
+        if (apk) {
+          project.url = apk.browser_download_url;
+          project.version = releases[0].tag_name;
+          project.downloads = releases[0].assets.reduce((s, a) => s + a.download_count, 0);
+          project.date = releases[0].published_at;
+        }
+      }
+      saveProject(project);
+    }).catch(() => saveProject(project));
+  } else {
+    saveProject(project);
+  }
+}
+
+function saveProject(project) {
+  const custom = JSON.parse(localStorage.getItem('nk_projects') || '[]');
+  custom.push(project);
+  localStorage.setItem('nk_projects', JSON.stringify(custom));
+
+  // Очистка формы
+  ['projName','projDesc','projIcon','projRepo','projVersion','projUrl','projShots']
+    .forEach(id => document.getElementById(id).value = '');
+
+  loadProjects();
+  renderAdminList();
+}
+
+function renderAdminList() {
+  const list = document.getElementById('adminProjectList');
+  const custom = JSON.parse(localStorage.getItem('nk_projects') || '[]');
+  if (custom.length === 0) {
+    list.innerHTML = '<p style="color:var(--text-dim);font-size:14px;">Нет кастомных проектов</p>';
+    return;
+  }
+  list.innerHTML = custom.map(p => `
+    <div class="admin-project-item">
+      <span>${p.icon || '📦'} ${p.name} (v${p.version})</span>
+      <button onclick="deleteProject('${p.id}')">Удалить</button>
+    </div>
+  `).join('');
+}
+
+function deleteProject(id) {
+  if (!confirm('Удалить проект?')) return;
+  const custom = JSON.parse(localStorage.getItem('nk_projects') || '[]');
+  const filtered = custom.filter(p => p.id !== id);
+  localStorage.setItem('nk_projects', JSON.stringify(filtered));
+  loadProjects();
+  renderAdminList();
+}
