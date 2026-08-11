@@ -118,16 +118,27 @@ async function loadProjects() {
         if (existing) {
           // Обновляем существующий проект данными из релиза
           if (primaryAsset && !existing.url) existing.url = primaryAsset.browser_download_url;
-          if (rel.tag_name && existing.version === '—') existing.version = rel.tag_name;
-          existing.downloads = assets.reduce((s, a) => s + a.download_count, 0);
-          if (rel.published_at) existing.date = rel.published_at;
-          // Сохраняем все ассеты
-          existing.allAssets = assets.map(a => ({
+          if (rel.tag_name && (existing.version === '—' || existing.version === 'v16')) existing.version = rel.tag_name;
+          existing.downloads = (existing.downloads || 0) + assets.reduce((s, a) => s + a.download_count, 0);
+          if (rel.published_at && new Date(rel.published_at) > new Date(existing.date || 0)) existing.date = rel.published_at;
+          // Мержим все ассеты из всех релизов
+          if (!existing.allAssets) existing.allAssets = [];
+          const newAssets = assets.map(a => ({
             name: a.name,
             url: a.browser_download_url,
             size: a.size,
             downloads: a.download_count
           }));
+          // Не дублируем ассеты по имени
+          for (const na of newAssets) {
+            if (!existing.allAssets.find(a => a.name === na.name)) existing.allAssets.push(na);
+          }
+          // Объединяем платформы
+          const relPlatforms = detectPlatforms(assets);
+          if (!existing.platforms) existing.platforms = [];
+          for (const p of relPlatforms) {
+            if (!existing.platforms.includes(p)) existing.platforms.push(p);
+          }
         } else {
           // Создаём новый проект из релиза
           const isGame = repo.includes('clock') || repo.includes('game');
