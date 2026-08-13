@@ -47,7 +47,7 @@ const DEFAULT_PROJECTS = [
     category: 'game',
     icon: '🕐',
     repo: 'lucifermornngstar52-cell/clock-angle-game',
-    version: 'v19',
+    version: 'v22',
     url: '',
     date: '2026-08-11T10:32:52Z',
     downloads: 0,
@@ -103,7 +103,7 @@ async function loadProjects() {
         if (existing) {
           // Обновляем существующий проект данными из релиза
           if (primaryAsset && !existing.url) existing.url = primaryAsset.browser_download_url;
-          if (rel.tag_name) existing.version = rel.tag_name;
+          if (rel.tag_name && (!existing.date || new Date(rel.published_at) >= new Date(existing.date))) existing.version = rel.tag_name;
           existing.downloads = (existing.downloads || 0) + assets.reduce((s, a) => s + a.download_count, 0);
           if (rel.published_at && new Date(rel.published_at) > new Date(existing.date || 0)) existing.date = rel.published_at;
           // Мержим все ассеты из всех релизов
