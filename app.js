@@ -1,7 +1,5 @@
 // ===== CONFIG =====
 const GITHUB_REPOS = [
-  'lucifermornngstar52-cell/aika-assistant',
-  'lucifermornngstar52-cell/airi-assistant',
   'lucifermornngstar52-cell/clock-angle-game',
   'lucifermornngstar52-cell/aika-admin'
 ];
@@ -10,36 +8,6 @@ const ADMIN_PASSWORD = 'nikita2026';
 
 // Предзаполненные проекты (показываются всегда, дополняются релизами)
 const DEFAULT_PROJECTS = [
-  {
-    id: 'default_aika',
-    name: 'Aika Assistant',
-    desc: 'AI-ассистент для Android с 3D-аватаром, голосовым управлением, доступом к экрану и автоматизацией задач. Live2D и 3D модели, оверлей поверх других приложений.',
-    category: 'app',
-    icon: 'aika-banner.png',
-    repo: 'lucifermornngstar52-cell/aika-assistant',
-    version: '—',
-    url: '',
-    date: '2026-08-11T00:00:00Z',
-    downloads: 0,
-    shots: [],
-    auto: false,
-    platforms: ['android']
-  },
-  {
-    id: 'default_airi',
-    name: 'AIRI Assistant',
-    desc: 'AI-ассистент с тёмным UI на Flutter + GPT-4o-mini. Голосовое управление, чат, автоматизация задач.',
-    category: 'app',
-    icon: '🌙',
-    repo: 'lucifermornngstar52-cell/airi-assistant',
-    version: '—',
-    url: '',
-    date: '2026-07-26T00:00:00Z',
-    downloads: 0,
-    shots: [],
-    auto: false,
-    platforms: ['android']
-  },
   {
     id: 'default_clock',
     name: 'Хранители Времени',
