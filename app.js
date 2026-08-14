@@ -1,5 +1,6 @@
 // ===== CONFIG =====
 const GITHUB_REPOS = [
+  'lucifermornngstar52-cell/airi-assistant',
   'lucifermornngstar52-cell/clock-angle-game',
   'lucifermornngstar52-cell/aika-admin'
 ];
@@ -8,6 +9,21 @@ const ADMIN_PASSWORD = 'nikita2026';
 
 // Предзаполненные проекты (показываются всегда, дополняются релизами)
 const DEFAULT_PROJECTS = [
+  {
+    id: 'default_airi',
+    name: 'AIRI Assistant',
+    desc: 'AI-ассистент на Flutter с двумя персонажами: милая AIRI и J.A.R.V.I.S. в стиле Iron Man. Live2D модели в чате, определение эмоций через камеру, голосовое управление, память о пользователе, дневник настроения, поиск в интернете, запуск приложений, напоминания, погода, конвертер валют. Android APK + Windows EXE.',
+    category: 'app',
+    icon: '🌙',
+    repo: 'lucifermornngstar52-cell/airi-assistant',
+    version: 'v1.1.0',
+    url: '',
+    date: '2026-08-14T00:00:00Z',
+    downloads: 0,
+    shots: [],
+    auto: false,
+    platforms: ['android', 'windows']
+  },
   {
     id: 'default_clock',
     name: 'Хранители Времени',
