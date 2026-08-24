@@ -15,7 +15,7 @@ const DEFAULT_PROJECTS = [
     category: 'game',
     icon: '🕐',
     repo: 'lucifermornngstar52-cell/clock-angle-game',
-    version: 'v25',
+    version: 'v26',
     url: '',
     date: '2026-08-11T10:32:52Z',
     downloads: 0,
