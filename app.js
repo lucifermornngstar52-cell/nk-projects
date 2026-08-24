@@ -11,11 +11,11 @@ const DEFAULT_PROJECTS = [
   {
     id: 'default_clock',
     name: 'Хранители Времени',
-    desc: 'Образовательная игра по математике времени для детей 1-5 классов. Учи углы стрелок часов в увлекательной форме! Android APK + Windows EXE.',
+    desc: 'Образовательная игра по математике времени для детей 1-5 классов. 10 мини-игр: углы, дроби, геометрия, астрономия. Android APK + Windows EXE.',
     category: 'game',
     icon: '🕐',
     repo: 'lucifermornngstar52-cell/clock-angle-game',
-    version: 'v22',
+    version: 'v25',
     url: '',
     date: '2026-08-11T10:32:52Z',
     downloads: 0,
