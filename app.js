@@ -10,18 +10,21 @@ const ADMIN_PASSWORD = 'nikita2026';
 const DEFAULT_PROJECTS = [
   {
     id: 'default_clock',
-    name: 'Хранители Времени',
-    desc: 'Образовательная игра по математике времени для детей 1-5 классов. 10 мини-игр: углы, дроби, геометрия, астрономия. Android APK + Windows EXE.',
+    name: 'Numbra',
+    desc: 'Математическая игра на углы между стрелками часов. 4 уровня (мин/сек, час/сек, час/мин, все углы), тысячи уникальных вопросов, монеты и достижения. В комплекте — книга задач «Математика времени, но тебе её объяснит РИК» в стиле Рика и Морти: 60 задач, аксиомы циферблата, марсианские сутки и подготовка к ЕНТ. Android APK + Windows EXE.',
     category: 'game',
-    icon: '🕐',
+    icon: 'numbra-icon.png',
     repo: 'lucifermornngstar52-cell/clock-angle-game',
     version: 'v26',
     url: '',
     date: '2026-08-11T10:32:52Z',
     downloads: 0,
-    shots: [],
+    shots: ['numbra-book-cover.jpg'],
     auto: false,
-    platforms: ['android', 'windows']
+    platforms: ['android', 'windows'],
+    extraLinks: [
+      { label: '📖 Скачать книгу задач (PDF)', url: 'Matematika_Vremeni_po-Rikovski.pdf' }
+    ]
   },
 ];
 
@@ -34,7 +37,17 @@ let isAdmin = false;
 document.addEventListener('DOMContentLoaded', () => {
   loadProjects();
   setupNavFilters();
+  setupScrollTopBtn();
 });
+
+function setupScrollTopBtn() {
+  const btn = document.getElementById('scrollTopBtn');
+  if (!btn) return;
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 320) btn.classList.add('visible');
+    else btn.classList.remove('visible');
+  });
+}
 
 function setupNavFilters() {
   document.querySelectorAll('.nav-link').forEach(link => {
@@ -250,7 +263,11 @@ function openModal(id) {
 
   const githubBtn = p.repo ? `<a href="https://github.com/${p.repo}" target="_blank" class="btn-secondary">📂 GitHub</a>` : '';
   const isMultiAsset = p.allAssets && p.allAssets.length > 1;
-  
+
+  const extraLinksHtml = (p.extraLinks && p.extraLinks.length)
+    ? `<div class="modal-extra-links">${p.extraLinks.map(l => `<a href="${l.url}" target="_blank" class="btn-secondary">${l.label}</a>`).join('')}</div>`
+    : '';
+
   document.getElementById('modalContent').innerHTML = `
     <div class="modal-icon">${iconHtml}</div>
     <h2>${p.name}</h2>
@@ -262,6 +279,7 @@ function openModal(id) {
     <div class="modal-actions">
       ${isMultiAsset ? githubBtn : dlBtn + githubBtn}
     </div>
+    ${extraLinksHtml}
   `;
 
   document.getElementById('modalOverlay').classList.add('active');

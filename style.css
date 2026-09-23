@@ -505,3 +505,45 @@ body::after {
 .modal-assets-section .modal-assets {
   flex: none;
 }
+
+/* SCROLL TO TOP ARROW */
+.scroll-top-btn {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1px solid var(--border-hover);
+  background: linear-gradient(135deg, var(--accent), var(--accent-light));
+  color: #fff;
+  font-size: 22px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 200;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(12px);
+  transition: opacity .25s ease, transform .25s ease, box-shadow .25s ease, visibility .25s ease;
+  box-shadow: 0 4px 16px var(--accent-glow);
+}
+.scroll-top-btn.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+.scroll-top-btn:hover {
+  box-shadow: 0 6px 22px var(--accent-glow);
+  transform: translateY(-3px);
+}
+
+/* MODAL EXTRA LINKS */
+.modal-extra-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
