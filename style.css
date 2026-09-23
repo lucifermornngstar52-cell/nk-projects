@@ -548,6 +548,28 @@ body::after {
   margin-top: 14px;
 }
 
+/* PROJECT + BOOK PAIR (game card, arrow, companion book tile) */
+.project-pair {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+.project-pair .project-card { flex: 0 1 300px; max-width: 320px; }
+.pair-arrow {
+  flex: 0 0 auto;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 30px;
+  color: var(--accent-light);
+  text-shadow: 0 0 12px var(--accent-glow);
+}
+.pair-arrow span { display: inline-block; animation: bookArrowPulse 1.4s ease-in-out infinite; }
+@keyframes bookArrowPulse {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(6px); }
+}
+
 /* BOOK CARD (companion tile linking straight to the PDF) */
 .book-card {
   background: var(--bg-card);
@@ -560,6 +582,7 @@ body::after {
   display: flex; flex-direction: column;
   position: relative;
   transition: all 0.3s ease;
+  flex: 0 1 300px; max-width: 320px;
 }
 .book-card:hover {
   background: var(--bg-card-hover);
@@ -567,29 +590,10 @@ body::after {
   transform: translateY(-4px);
   box-shadow: 0 12px 40px rgba(110, 68, 255, 0.12);
 }
-.book-arrow {
-  position: absolute;
-  top: 50%;
-  left: -34px;
-  transform: translateY(-50%);
-  font-size: 26px;
-  color: var(--accent-light);
-  text-shadow: 0 0 10px var(--accent-glow);
-  animation: bookArrowPulse 1.4s ease-in-out infinite;
-  pointer-events: none;
-  z-index: 5;
-}
-@keyframes bookArrowPulse {
-  0%, 100% { transform: translateY(-50%) translateX(0); opacity: 0.55; }
-  50% { transform: translateY(-50%) translateX(6px); opacity: 1; }
-}
-.book-banner { background: linear-gradient(135deg, rgba(0, 217, 163, 0.12), rgba(110, 68, 255, 0.15)); }
+.book-banner { position: relative; background: linear-gradient(135deg, rgba(0, 217, 163, 0.12), rgba(110, 68, 255, 0.15)); }
 .book-banner img { width: 100%; height: 100%; object-fit: cover; }
 
 @media (max-width: 640px) {
-  .book-arrow { top: -30px; left: 50%; transform: translateX(-50%) rotate(90deg); }
-  @keyframes bookArrowPulse {
-    0%, 100% { transform: translateX(-50%) rotate(90deg) translateX(0); opacity: 0.55; }
-    50% { transform: translateX(-50%) rotate(90deg) translateX(6px); opacity: 1; }
-  }
+  .project-pair { flex-direction: column; }
+  .pair-arrow { transform: rotate(90deg); }
 }

@@ -203,7 +203,7 @@ function renderProjects() {
       ? `<button class="card-download" onclick="event.stopPropagation();downloadProject('${p.id}')">⬇ Скачать</button>`
       : `<button class="card-download" disabled>Скоро</button>`;
 
-    cardsHtml.push(`
+    const gameCardHtml = `
       <div class="project-card" onclick="openModal('${p.id}')">
         <div class="card-banner">${iconHtml}
           ${p.downloads ? `<span class="card-badge">⬇ ${p.downloads}</span>` : ''}
@@ -216,13 +216,14 @@ function renderProjects() {
             ${dlBtn}
           </div>
         </div>
-      </div>`);
+      </div>`;
 
     if (p.book) {
-      cardsHtml.push(`
+      const bookCardHtml = `
       <a class="book-card" href="${p.book.url}" target="_blank" rel="noopener">
-        <span class="book-arrow">➜</span>
-        <div class="card-banner book-banner"><img src="${p.book.cover}" alt="${p.book.title}"></div>
+        <div class="card-banner book-banner">
+          <img src="${p.book.cover}" alt="${p.book.title}">
+        </div>
         <div class="card-body">
           <div class="card-title">📖 ${p.book.title}</div>
           <div class="card-desc">${p.book.desc}</div>
@@ -231,7 +232,15 @@ function renderProjects() {
             <button class="card-download">⬇ Открыть</button>
           </div>
         </div>
-      </a>`);
+      </a>`;
+      cardsHtml.push(`
+      <div class="project-pair">
+        ${gameCardHtml}
+        <div class="pair-arrow" aria-hidden="true"><span>➜</span></div>
+        ${bookCardHtml}
+      </div>`);
+    } else {
+      cardsHtml.push(gameCardHtml);
     }
   });
 
