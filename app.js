@@ -24,7 +24,13 @@ const DEFAULT_PROJECTS = [
     platforms: ['android', 'windows'],
     extraLinks: [
       { label: '📖 Скачать книгу задач (PDF)', url: 'Matematika_Vremeni_po-Rikovski.pdf' }
-    ]
+    ],
+    book: {
+      title: 'Книга задач',
+      desc: '60 задач про углы часов в стиле Рика и Морти',
+      cover: 'numbra-book-cover.jpg',
+      url: 'Matematika_Vremeni_po-Rikovski.pdf'
+    }
   },
 ];
 
@@ -182,7 +188,8 @@ function renderProjects() {
     return;
   }
 
-  grid.innerHTML = filtered.map(p => {
+  const cardsHtml = [];
+  filtered.forEach(p => {
     const iconHtml = p.icon && (p.icon.startsWith('http') || p.icon.match(/\.(png|jpg|jpeg|webp|gif|svg)/i))
       ? `<img src="${p.icon}" alt="${p.name}">`
       : p.icon || '📦';
@@ -196,7 +203,7 @@ function renderProjects() {
       ? `<button class="card-download" onclick="event.stopPropagation();downloadProject('${p.id}')">⬇ Скачать</button>`
       : `<button class="card-download" disabled>Скоро</button>`;
 
-    return `
+    cardsHtml.push(`
       <div class="project-card" onclick="openModal('${p.id}')">
         <div class="card-banner">${iconHtml}
           ${p.downloads ? `<span class="card-badge">⬇ ${p.downloads}</span>` : ''}
@@ -209,8 +216,26 @@ function renderProjects() {
             ${dlBtn}
           </div>
         </div>
-      </div>`;
-  }).join('');
+      </div>`);
+
+    if (p.book) {
+      cardsHtml.push(`
+      <a class="book-card" href="${p.book.url}" target="_blank" rel="noopener">
+        <span class="book-arrow">➜</span>
+        <div class="card-banner book-banner"><img src="${p.book.cover}" alt="${p.book.title}"></div>
+        <div class="card-body">
+          <div class="card-title">📖 ${p.book.title}</div>
+          <div class="card-desc">${p.book.desc}</div>
+          <div class="card-footer">
+            <span class="card-version">PDF</span>
+            <button class="card-download">⬇ Открыть</button>
+          </div>
+        </div>
+      </a>`);
+    }
+  });
+
+  grid.innerHTML = cardsHtml.join('');
 }
 
 function updateStats() {
