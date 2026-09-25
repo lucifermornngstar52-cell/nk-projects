@@ -21,8 +21,10 @@ const DEFAULT_PROJECTS = [
     downloads: 0,
     shots: ['numbra-book-cover.jpg'],
     auto: false,
-    platforms: ['android', 'windows'],
+    platforms: ['android', 'windows', 'web'],
+    webUrl: 'https://lucifermornngstar52-cell.github.io/clock-angle-game/',
     extraLinks: [
+      { label: '📱 Играть в браузере (iOS/iPhone)', url: 'https://lucifermornngstar52-cell.github.io/clock-angle-game/' },
       { label: '📖 Скачать книгу задач (PDF)', url: 'Matematika_Vremeni_po-Rikovski.pdf' }
     ],
     book: {
@@ -202,6 +204,9 @@ function renderProjects() {
     const dlBtn = p.url
       ? `<button class="card-download" onclick="event.stopPropagation();downloadProject('${p.id}')">⬇ Скачать</button>`
       : `<button class="card-download" disabled>Скоро</button>`;
+    const webBtn = p.webUrl
+      ? `<button class="card-download" style="margin-left:6px;background:rgba(151,206,76,.12);color:#97ce4c;" onclick="event.stopPropagation();window.open('${p.webUrl}','_blank')">🌐 Играть</button>`
+      : '';
 
     const gameCardHtml = `
       <div class="project-card" onclick="openModal('${p.id}')">
@@ -213,7 +218,7 @@ function renderProjects() {
           <div class="card-desc">${p.desc}</div>
           <div class="card-footer">
             <span class="card-version">${platformIcons} v${p.version}</span>
-            ${dlBtn}
+            ${dlBtn}${webBtn}
           </div>
         </div>
       </div>`;
@@ -296,6 +301,7 @@ function openModal(id) {
   }
 
   const githubBtn = p.repo ? `<a href="https://github.com/${p.repo}" target="_blank" class="btn-secondary">📂 GitHub</a>` : '';
+  const webModalBtn = p.webUrl ? `<a href="${p.webUrl}" target="_blank" class="btn-secondary">🌐 Играть онлайн</a>` : '';
   const isMultiAsset = p.allAssets && p.allAssets.length > 1;
 
   const extraLinksHtml = (p.extraLinks && p.extraLinks.length)
@@ -311,7 +317,7 @@ function openModal(id) {
     ${shotsHtml}
     ${isMultiAsset ? `<div class="modal-assets-section"><h4>Файлы для скачивания:</h4>${dlBtn}</div>` : ''}
     <div class="modal-actions">
-      ${isMultiAsset ? githubBtn : dlBtn + githubBtn}
+      ${isMultiAsset ? webModalBtn + githubBtn : dlBtn + githubBtn}
     </div>
     ${extraLinksHtml}
   `;
