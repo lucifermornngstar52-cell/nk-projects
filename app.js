@@ -211,7 +211,6 @@ function renderProjects() {
     const gameCardHtml = `
       <div class="project-card" onclick="openModal('${p.id}')">
         <div class="card-banner">${iconHtml}
-          ${p.downloads ? `<span class="card-badge">⬇ ${p.downloads}</span>` : ''}
         </div>
         <div class="card-body">
           <div class="card-title">${p.name}</div>
@@ -254,8 +253,6 @@ function renderProjects() {
 
 function updateStats() {
   document.getElementById('statApps').textContent = projects.length;
-  const totalDl = projects.reduce((s, p) => s + (p.downloads || 0), 0);
-  document.getElementById('statDownloads').textContent = totalDl > 1000 ? (totalDl / 1000).toFixed(1) + 'k' : totalDl;
   if (projects.length > 0) {
     document.getElementById('statLatest').textContent = projects[0].version || '—';
   }
@@ -282,7 +279,6 @@ function openModal(id) {
   const metaHtml = `
     <div class="modal-meta">
       <span class="meta-item">📅 ${p.date ? new Date(p.date).toLocaleDateString('ru') : '—'}</span>
-      <span class="meta-item">⬇ ${p.downloads || 0} загрузок</span>
       ${platformIcons}
     </div>`;
 
@@ -292,7 +288,7 @@ function openModal(id) {
     dlBtn = `<div class="modal-assets">${p.allAssets.map(a => {
       const icon = a.name.endsWith('.apk') ? '🤖' : a.name.endsWith('.exe') ? '🪟' : a.name.endsWith('.zip') ? '📦' : '📄';
       const sizeMb = (a.size / 1024 / 1024).toFixed(1);
-      return `<a href="${a.url}" download class="btn-asset"><span>${icon} ${a.name}</span><small>${sizeMb} MB · ⬇ ${a.downloads}</small></a>`;
+      return `<a href="${a.url}" download class="btn-asset"><span>${icon} ${a.name}</span><small>${sizeMb} MB</small></a>`;
     }).join('')}</div>`;
   } else if (p.url) {
     dlBtn = `<a href="${p.url}" download class="btn-primary">⬇ Скачать</a>`;
